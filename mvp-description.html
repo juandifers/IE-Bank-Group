@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MVP Description - IE Bank MVP</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 20px;
+            background-color: #f9f9f9;
+            color: #333;
+        }
+        h1, h2 {
+            color: #2E5C6E;
+        }
+        h1 {
+            border-bottom: 2px solid #2E5C6E;
+            padding-bottom: 10px;
+        }
+        ul {
+            margin-left: 20px;
+            list-style-type: disc;
+        }
+        li {
+            margin-bottom: 10px;
+        }
+        p {
+            margin-top: 10px;
+        }
+        .back-link {
+            margin-top: 30px;
+        }
+        a {
+            text-decoration: none;
+            color: #007acc;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <h1>Detailed MVP Description</h1>
+    <p>The Minimum Viable Product (MVP) for the IE Bank app focuses on delivering essential functionalities to provide a secure and user-friendly digital banking experience. This includes an Admin Portal for bank user management, a User Portal for account management, and a basic authentication system to ensure security.</p>
+
+    <h2>Core Functionalities</h2>
+
+    <h3>1. Admin Portal – Bank Users Management System</h3>
+    <p>The Admin Portal is designed for bank administrators to manage users effectively. It includes CRUD (Create, Read, Update, Delete) functionalities, allowing admins to perform essential user management operations.</p>
+    <ul>
+        <li><strong>FR 1:</strong> The application must provide a default administrator account with a username and password. The admin account must be able to access the Users Management Portal after successful login.</li>
+        <li><strong>FR 2:</strong> Upon logging into the Users Management Portal, a bank administrator can:
+            <ul>
+                <li>List all registered bank users.</li>
+                <li>Create new bank user profiles, including assigning initial credentials.</li>
+                <li>Update bank user information, such as contact details or status.</li>
+                <li>Delete bank user accounts if necessary.</li>
+            </ul>
+        </li>
+    </ul>
+
+    <h3>2. User Portal – Bank Account Management System</h3>
+    <p>The User Portal is designed for end-users of the app to manage their bank accounts and perform basic banking operations. Each registered user can log in and view only their own accounts and transactions.</p>
+    <ul>
+        <li><strong>FR 3:</strong> User Registration – New bank users can register using a form with fields for:
+            <ul>
+                <li><strong>Username:</strong> Unique identifier for the user.</li>
+                <li><strong>Password:</strong> User-defined, confirmed in a separate field.</li>
+                <li><strong>Account Creation:</strong> Upon registration, the system will generate a default bank account with a randomly assigned account number.</li>
+            </ul>
+        </li>
+        <li><strong>FR 4:</strong> User Login and Account Access – Users can log into the web application with their credentials to:
+            <ul>
+                <li>View all their linked bank accounts.</li>
+                <li>Access details of recent transactions associated with their accounts.</li>
+                <li>Ensure visibility is restricted to accounts they own.</li>
+            </ul>
+        </li>
+        <li><strong>FR 5:</strong> Money Transfer – Users can transfer money between accounts within IE Bank by entering:
+            <ul>
+                <li>The recipient’s account number.</li>
+                <li>The transfer amount (must not exceed the available balance in the sender’s account).</li>
+            </ul>
+            The transfer functionality ensures funds can only be transferred if sufficient balance exists.
+        </li>
+    </ul>
+
+    <h3>3. Security Requirements – Basic Authentication System</h3>
+    <ul>
+        <li><strong>Basic Authentication:</strong>
+            <ul>
+                <li>Users and admins must enter their username and password to access their respective portals.</li>
+                <li>Credentials are stored securely, with passwords hashed in the database to prevent unauthorized access.</li>
+                <li>No advanced methods (such as biometrics, tokens, or OAuth) are used in this MVP, keeping authentication simple yet effective.</li>
+            </ul>
+        </li>
+        <li><strong>Frontend Simplicity:</strong>
+            <ul>
+                <li>The interface is designed for ease of use, focusing on essential functionality without aesthetic enhancements.</li>
+                <li>Compatibility across browsers and devices is limited to ensure simplicity, aiming for an MVP that meets basic usability standards without focusing on responsiveness or design variations.</li>
+            </ul>
+        </li>
+    </ul>
+
+    <div class="back-link">
+        <p><a href="index.html">← Back to Home</a></p>
+    </div>
+</body>
+</html>
