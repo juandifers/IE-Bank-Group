@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Collaboration Strategy - IE Bank MVP</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 20px;
+            background-color: #f9f9f9;
+            color: #333;
+        }
+        h1, h2 {
+            color: #2E5C6E;
+        }
+        h1 {
+            border-bottom: 2px solid #2E5C6E;
+            padding-bottom: 10px;
+        }
+        ul {
+            margin-left: 20px;
+            list-style-type: disc;
+        }
+        li {
+            margin-bottom: 10px;
+        }
+        p {
+            margin-top: 10px;
+        }
+        .back-link {
+            margin-top: 30px;
+        }
+        a {
+            text-decoration: none;
+            color: #007acc;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <h1>Collaboration Strategy</h1>
+
+    <h2>Overview</h2>
+    <p>Our team uses Slack as the primary hub for communication and task management. To streamline workflows, we’ve integrated Slack with GitHub and Azure Boards to enable real-time notifications and seamless collaboration.</p>
+
+    <h2>Integrations</h2>
+
+    <h3>GitHub - Slack</h3>
+    <ul>
+        <li><strong>Purpose:</strong> Receive notifications for GitHub activity such as issues, pull requests, and commits in Slack.</li>
+        <li><strong>Setup:</strong>
+            <ul>
+                <li>Installed the GitHub app in Slack.</li>
+                <li>Subscribed to repository events using <code>/github subscribe [repo-url]</code>.</li>
+                <li>Configured notifications for pull requests, issues, and commits.</li>
+            </ul>
+        </li>
+    </ul>
+
+    <h3>Azure Boards - Slack</h3>
+    <ul>
+        <li><strong>Purpose:</strong> Notify the team about updates in Azure Boards, such as new work items or status changes.</li>
+        <li><strong>Setup:</strong>
+            <ul>
+                <li>Installed the Azure Boards app in Slack.</li>
+                <li>Linked the project to the Slack channel using <code>/azboards link</code>.</li>
+                <li>Configured subscriptions for work item updates using <code>/azboards subscriptions add</code>.</li>
+            </ul>
+        </li>
+    </ul>
+
+    <h3>Zoom - Slack</h3>
+    <ul>
+        <li><strong>Purpose:</strong> Simplify meeting scheduling and video calls directly from Slack.</li>
+        <li><strong>Setup:</strong>
+            <ul>
+                <li>Installed the Zoom app in Slack.</li>
+                <li>Enabled <code>/zoom</code> commands for starting and scheduling meetings.</li>
+            </ul>
+        </li>
+    </ul>
+
+    <h2>Slack Channels</h2>
+    <ul>
+        <li><strong>#devops:</strong> For DevOps-related updates, including Azure Boards and pipeline notifications.</li>
+        <li><strong>#github-updates:</strong> Notifications for GitHub pull requests, issues, and commits.</li>
+        <li><strong>#meetings:</strong> For Zoom meeting links and scheduling.</li>
+        <li><strong>#general:</strong> General team discussions and announcements.</li>
+    </ul>
+
+    <div class="back-link">
+        <p><a href="index.html">← Back to Home</a></p>
+    </div>
+</body>
+</html>
