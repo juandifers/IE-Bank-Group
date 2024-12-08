@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Azure Services Configuration - IE Bank</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 20px;
+            background-color: #f9f9f9;
+            color: #333;
+        }
+        h1, h2, h3 {
+            color: #2E5C6E;
+        }
+        h1 {
+            border-bottom: 2px solid #2E5C6E;
+            padding-bottom: 10px;
+        }
+        ul {
+            margin-left: 20px;
+            list-style-type: disc;
+        }
+        li {
+            margin-bottom: 10px;
+        }
+        p {
+            margin-top: 10px;
+        }
+        .back-link {
+            margin-top: 30px;
+        }
+        a {
+            text-decoration: none;
+            color: #007acc;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <h1>Azure Services - Modules Bicep Files</h1>
+
+    <p>As part of the Infrastructure for the IE Bank app, these Azure services have been configured to support the application’s architecture. Below is a description of each Azure service, its purpose, and the configuration used for each in various environments (dev, uat, prod).</p>
+    
+    <h2>Modules</h2>
+    
+    <div>
+        <h3>Application Insights</h3>
+            <p>Application Insights is used for monitoring  the availability, performance, and usage of our application. It provides analytics tools to help lcoate issues and gain insights into our users experience.</p>
+            <h4>Configuration Applied:</h4>
+                <ul>
+                    <li><strong>Resource Type:</strong> `Microsoft.Insights/components`</li>
+                    <li><strong>Kind:</strong> `web` (for monitoring web applications)</li>
+                    <li><strong>Workspace Resource ID:</strong> Linked to our Log Analytics Workspace for monitoring.</li>
+                    <li><strong>Properties:</strong> Configured to track web application performance, focusing on metrics like page load times/login response times.</li>
+                </ul>
+
+            <h4>Alerting for Performance</h4>
+            <p>To ensure performance, we set up metric alerts for monitoring key performance indicators (KPIs):</p>
+
+                <h5>Page Load Time - Alert</h5>
+                    <p>This alert triggers if the page load time exceeds 5 seconds, helping us monitor and address slow-loading pages promptly.</p>
+                    <ul>
+                        <li><strong>Metric:</strong> `browserTimings/totalDuration` (measures total page load time)</li>
+                        <li><strong>Threshold:</strong> 5 seconds</li>
+                        <li><strong>Alert Actions:</strong> Sends a webhook notification to our Slack channel through a Logic App action group.</li>
+                    </ul>
+
+                <h5>Login SLO - Alert</h5>
+                <p>This alert notify us if the login response time is greater than 5 seconds, which could be an issue with authentication performance.</p>
+                    <ul>
+                        <li><strong>Metric:</strong> `requests/duration` (response time for login requests)</li>
+                        <li><strong>Threshold:</strong>5 seconds</li>
+                        <li><strong>Alert Actions:</strong> Sends a webhook notification to our Slack channel.</li>
+                    </ul>
+
+            <h4>Key Vault Configuration</h4>
+            <p><strong>Key Vault</strong> is used to store and manage secrets (connection strings, instrumentation keys).</p>
+            
+                <h5>Key Vault:</h5>
+                <ul>
+                    <li><strong>Resource Type:</strong> `Microsoft.KeyVault/vaults`</li>
+                    <li><strong>Secrets Stored:</strong> Application Insights Instrumentation Key, Connection String</li>
+                </ul>
+    
+            <h4>Integration with Application Insights:</h4>
+            <p>Secrets (Instrumentation Key, Connection String) are retrieved from Key Vault and used in the Application Insights configuration for monitoring this application.</p>
+        
+
+        <h3>Container Registry</h3>
+        <p>Container Registry is used for storing Docker container images. This module creates the ACR and stores its admin credentials in our Key Vault.</p>
+            <h4>Configuration Applied:</h4>
+            <ul>
+                <li><strong>Resource Type:</strong> <code>Microsoft.ContainerRegistry/registries</code></li>
+                <li><strong>SKU:</strong> Basic (suitable for dev and uat environments)</li>
+                <li><strong>Location:</strong> Configured to the resource group location (<code>resourceGroup().location</code>)</li>
+                <li><strong>Admin User Enabled:</strong> True</li>
+            </ul>  
+
+            <h4>Credential Storage in Key Vault</h4>
+            <p>Admin credentials for the ACR are stored in our Key Vault. This ensures that this sensitive information is kept secure and managed centrally.</p>
+            <ul>
+                <li><strong>Key Vault Resource Type:</strong> <code>Microsoft.KeyVault/vaults</code></li>
+                <li>
+                    <ul>
+                        <li><code>Admin Username</code>: The ACR admin username is stored as a secret.</li>
+                        <li><code>Admin Password 0</code>: The primary ACR admin password is stored as a secret.</li>
+                        <li><code>Admin Password 1</code>: The secondary ACR admin password is stored as a secret.</li>
+                    </ul>
+                </li>
+                <li><strong>Secret Retrieval:</strong> Credentials are retrieved using the <code>containerRegistry.listCredentials()</code> method.</li>
+            </ul>
+
+            <h4>Diagnostic Settings</h4>
+            <p>Configured for monitoring/logging activities related to ACR. Logs and metrics are sent to our Log Analytics Workspace.</p>
+            <ul>
+                <li><strong>Workspace Resource ID:</strong> Links to our Log Analytics Workspace for diagnostics.</li>
+                <li><strong>Metrics:</strong> Includes all metrics for monitoring ACR performance.</li>
+                <li><strong>Logs:</strong> Captures any events for:
+                    <ul>
+                        <li><strong>CR Login Events:</strong> Tracks login activities to the registry.</li>
+                        <li><strong>CR Repository Events:</strong> Tracks image pull, push, and delete.</li>
+                    </ul>
+                </li>
+            </ul>
+
+                <h5>Unauthorized Login Attempts - Alert</h5>
+                <p>This alert notifies us of unauthorized login attempts to the ACR, allows for us to take quick action against potential security breaches.</p>
+                <ul>
+                    <li><strong>Metric:</strong> <code>ContainerRegistryLoginEvents</code></li>
+                    <li><strong>Threshold:</strong> Greater than 0 unauthorized logins within a 5-minute period.</li>
+                    <li><strong>Alert Actions:</strong> Sends a notification to our security team's Slack channel through a Logic App action group.</li>
+                </ul>
+
+                <h4>Integration in CI/CD Pipeline</h4>
+                <p>
+                    The ACR is integrated into our CI/CD pipeline to streamline the build & deployment process. Docker images are pushed to our registry during CI/CD workflows, and each environment (dev, test, prod) has its own registry to maintain isolation.
+                </p>
+                <ul>
+                    <li><strong>Image Storage:</strong> Stores Docker images built during CI/CD.</li>
+                    <li><strong>Environment Isolation:</strong> Each environment has a separate container registry.</li>
+                </ul>
+
+
+        <h3>Key Vault</h3>
+        <p>Key Vault is used to securely store secrets(credentials, keys) used by our application in a cloud setting for effective security.</p>
+            <h4>Configuration Applied:</h4>
+            <ul>
+                <li><strong>Resource Type:</strong> <code>Microsoft.KeyVault/vaults</code></li>
+                <li><strong>SKU:</strong> Standard (suitable for most workloads)</li>
+                <li><strong>Location:</strong> Configured to the resource group location (<code>resourceGroup().location</code>)</li>
+                <li><strong>Access Policies:</strong> Role-based Access Control (RBAC) to manage user permissions.</li>
+                <li><strong>Soft Delete Enabled:</strong> Accidental deletions can be recovered within our retention period.</li>
+            </ul>
+            <h4>Stored Secrets/Access Management</h4>
+            <ul>
+                <li><code>Admin Username</code>: Stored as a KV secret.</li>
+                <li><code>Admin Passwords</code>: Password0 and Password1 admin passwords stored separately.</li>
+                <li><code>Key Vault Administrator</code>: Full administrative control over KV.</li>
+                <li><code>Key Vault Secrets User</code>: Limited access to retrieve secrets.</li>
+            </ul>
+
+            <h4>Diagnostic Settings</h4>
+            <p>Configured for monitoring Key Vault operations and ensuring we are complying with security policies. Logs and metrics are sent to our Log Analytics Workspace for analysis/alerting.</p>
+            <ul>
+                <li><strong>Workspace Resource ID:</strong> Linked to our Log Analytics Workspace.</li>
+                <li><strong>Metrics:</strong> Includes all metrics for monitoring KV performance and availability.</li>
+                <li><strong>Logs:</strong> Captures events for: Audit Events (tracks access attempts, successful or failed operations, and changes in the configuration).</li>
+            </ul>
+
+            <h4>Alerting for Key Vault Operations</h4>
+            <p>Configured to monitor Key Vault activities, which ensures security:</p>
+
+                <h5>Unauthorized Access Attempts - Alert</h5>
+                <p>This alert notifies us of any unauthorized access attempts to the Key Vault, allowing us to take immediate action.</p>
+                <ul>
+                    <li><strong>Metric:</strong> <code>AuditEvent</code></li>
+                    <li><strong>Threshold:</strong> Greater than 0 unauthorized access attempts within a 5 min period.</li>
+                    <li><strong>Alert Actions:</strong> Sends a notification to our Slack channel through the Logic App action group.</li>
+                </ul>
+
+            <h4>Integration with Other Services</h4>
+            <ul>
+                <li><strong>Azure Container Registry:</strong> Admin credentials are stored securely in KV.</li>
+            </ul>
+
+
+        <h3>Log Analytics</h3>
+        <p>Log Analytics Workspace is used for centralized log collection and analysis across multiple Azure services.</p>
+            <h4>Configuration Applied:</h4>
+            <ul>
+                <li><strong>Resource Type:</strong> <code>Microsoft.OperationalInsights/workspaces</code></li>
+                <li><strong>SKU:</strong> <code>PerGB2018</code> (Pay-as-you-go model that scales based on data volume, suitable for most environments). Done for cost efficiency (and scalability) by billing on the exact amount of data used.</li>
+                <li><strong>Location:</strong> Configured to the resource group location (<code>resourceGroup().location</code>)</li>
+                <li><strong>Data Retention:</strong> Logs are retained for 30 days, which complies with our monitoring and analysis requirements.</li>
+            </ul>
+
+            <h4>Outputs</h4>
+            <ul>
+                <li><strong>Workspace ID:</strong> The unique ID of the Log Analytics Workspace, which allows for associating resources with the workspace.</li>
+                <li><strong>Workspace Name:</strong> Used for referencing our workspace in other resources.</li>
+            </ul>
+
+            <h4>Integration with Monitoring Services</h4>
+            <ul>
+                <li><strong>Azure Diagnostic Settings:</strong> Used to send logs/metrics from resources (Key Vault, Azure Container Registry) to the workspace for analysis.</li>
+                <li><strong>Azure Monitor:</strong> Enables querying and analyzing logs using Kusto Query Language (KQL).</li>
+                <li><strong>Application Insights:</strong> Logs and telemetry are stored in the workspace.</li>
+            </ul>
+
+
+
+        <h3>Logic Apps</h3>
+        <p>Deployed to automate workflows & integrate with external services (Slack Channel), allowing processes such as notifications, data processing, and application integration. </p>
+            <h4>Configuration Applied:</h4>
+            <ul>
+                <li><strong>Resource Type:</strong> <code>Microsoft.Logic/workflows</code></li>
+                <li><strong>Location:</strong> Configured to the resource group location (<code>resourceGroup().location</code>)</li>
+                <li><strong>State:</strong> Enabled (the Logic App is active upon deployment).</li>
+                <li><strong>Workflow Definition:</strong> The workflow logic is defined in an external JSON file (<code>logicAppWorkflow.json</code>) and loaded dynamically during deployment.</li>
+                <li><strong>Parameters:</strong><code>slackWebhookUrl:</code> Accepts the webhook URL for sending notifications to our Slack channel.</li>
+            </ul>
+
+            <h4>Slack Integration</h4>
+            <p>Integrates with Slack to send automated notifications using a webhook URL. The integration helps notify teams about events or alerts directly in the channel.</p>
+        
+            <h4>Workflow Definition</h4>
+            <p> The workflow logic for our Logic App is stored in <code>logicAppWorkflow.json</code>. It is designed to automatically send alerts to Slack every 5 minutes. </p>
+            <h4>Key Parts of the Workflow</h4>
+                <ul>
+                    <li><strong>Parameters (Slack Webhook URL):</strong> where the app sends messages to Slack.</li>
+                    <li><strong>Trigger Frequency:</strong> Every 5 minutes.</li>
+                    <li><strong>Trigger Type:</strong> Recurrence trigger, so it repeats automatically.</li>
+                    <li><strong>Actions: Send a POST Request:</strong> sends a message to Slack using the webhook URL.</li>
+                    <li><strong>Actions: Content:</strong> The message says: "Alert: An event triggered Logic App and sent alert to Slack App."</li>
+                </ul>
+
+
+        <h3>PostgreSQL Database</h3>
+        <p> Sets up PostgreSQL database on an existing PostgreSQL server in Azure. The database is configured with UTF-8 character encoding and collation for handling of text data.</p>
+            <h4>Configuration Applied:</h4>
+            <ul>
+                <li><strong>Resource Type:</strong> <code>Microsoft.DBforPostgreSQL/flexibleServers</code></li>
+                <li><strong>Database Name:</strong> ie-bank-db</li>
+                <li><strong>Character Set:</strong> <code>UTF8</code>: the database can store text in multiple languages.</li>
+                <li><strong>Collation:</strong> <code>en_US.UTF8</code>:  Sets the sorting rules for the database to be in English (US) with UTF-8 encoding.</li>
+            </ul>
+
+
+        <h3>PostgreSQL Server</h3>
+        <p>PostgreSQL (flexible) Server with administrative settings, storage, backup, and diagnostics enabled. Also configured firewall rules and admin access for the PostgreSQL server.</p>
+            <h4>Configuration Applied:</h4>
+            <ul>
+                <li><strong>Resource Type:</strong> <code>Microsoft.DBforPostgreSQL/flexibleServers</code></li>
+                <li><strong>Server SKU:</strong> <code>Standard_B1ms</code> (Burstable tier for cost-efficient performance)</li>
+                <li><strong>Location:</strong> Configured to the resource group location (<code>resourceGroup().location</code>)</li>
+                <li><strong>Admin Login:</strong> username: <code>iebankdbadmin</code> and password: <code>IE.Bank.DB.Admin.Pa$$</code></li>
+                <li><strong>Version:</strong> version <code>15</code></li>
+                <li><strong>Authentication:</strong> Active Directory and password authentication enabled, with the tenant ID set to the current subscription's tenant.</li>
+                <li><strong>Storage:</strong> 32GB of storage.</li>
+                <li><strong>Backup:</strong> Backup retention set for 7 days, with geo-redundant backup disabled.</li>
+                <li><strong>High Availability:</strong> Disabled.</li>
+            </ul>
+
+            <h4>Firewall Configuration</h4>
+            <p>A firewall rule is defined for all Azure services to access the server by setting the start and end IP addresses to <code>0.0.0.0</code>.</p>
+
+            <h4>Diagnostics Configuration</h4>
+            <p>Configured to collect logs and metrics for the server. These are sent to our Log Analytics workspace for monitoring/troubleshooting purposes.</p>
+            <ul>
+                <li><strong>Logs:</strong> <code>PostgreSQLLogs</code>, <code>PostgreSQLFlexSessions</code>, <code>PostgreSQLFlexQueryStoreRuntime</code></li>
+                <li><strong>Metrics:</strong> Includes all metrics for monitoring server performance.</li>
+            </ul>
+
+
+        <h3>Workbook</h3>
+        <p>Workbook is used within Application Insights for visualizing metrics and logs for services including Static Web Apps, Key Vaults, and Application Insights.</p>
+        
+            <h4>Configuration Applied:</h4>
+            <ul>
+                <li><strong>Resource Type:</strong> <code>Microsoft.Insights/workbooks</code></li>
+                <li><strong>Location:</strong> Configured to the resource group's location (<code>location</code>)</li>
+                <li><strong>Category:</strong> Set to <code>workflow</code></li>
+                <li><strong>Display Name:</strong> <code>apayne workflow</code></li>
+                <li><strong>Serialized Data:</strong> Contains JSON configuration for visualizing various metrics like Static Web App availability, Key Vault performance, App Insights availability, HTTP request duration, and failed requests over defined time periods.</li>
+                <li><strong>Source ID:</strong> Linked to Application Insights</li>
+            </ul>
+        
+            <h4>Workbook Overview</h4>
+            <ul>
+                <li><strong>Text Sections:</strong> Includes titles/descriptions like <code>Static Web App Availability - 99.7% Uptime Target</code>, <code>Key Vault Availability - 99.7% Uptime Availability</code>, <code>App Insights Availability - 99.7% Uptime Target</code>, <code>HTTP Request Duration - 200ms Target</code>, and <code>Failed Requests (over 30 Days) - 5 Count Target</code>.</li>
+                <li><strong>Chart Sections:</strong> Displays metrics for resources like Static Web Apps, Key Vaults, App Insights, and HTTP Requests. These charts show metrics over specified durations (30 days, 7 days), with threshold-based formatting to represent states (success, warning, critical).</li>
+                <li><strong>Chart Types:</strong> The metrics are in chartType: <code>2</code>,  with thresholds defined to represent the health status of the resource.</li>
+                <li><strong>Resource Types:</strong> The monitored resources are <code>microsoft.web/staticsites</code> for Static Web Apps, <code>microsoft.keyvault/vaults</code> for Key Vaults, and <code>microsoft.insights/components</code> for Application Insights.</li>
+            </ul>
+
+
+        <h3>App Service Plan</h3>
+        <p>The App Service Plan provides an environment for hosting web applications, APIs, and mobile backends. The plan specifies the SKU, location, and Linux-based configuration.</p>
+            <h4>Configuration Applied:</h4>
+            <ul>
+                <li><strong>Resource Type:</strong> <code>Microsoft.Web/serverfarms</code></li>
+                <li><strong>App Service Plan Name:</strong> <code>appServicePlanName</code></li>
+                <li><strong>Location:</strong> Configured to the resource group's location (<code>resourceGroup().location</code>)</li>
+                <li><strong>SKU Name:</strong> <code>appServicePlanSkuName</code> (Allowed values: <code>B1</code>, <code>F1</code>)</li>
+                <li><strong>Kind:</strong> <code>linux</code> (set for Linux-based hosting)</li>
+                <li><strong>Reserved:</strong> Set to true to specify a Linux-based App Service Plan</li>
+            </ul>
+
+
+        <h3>App Service: Static Web App</h3>
+        <p>Static Web Apps are used for hosting the frontend of the application.</p>
+            <h4>Configuration Applied:</h4>
+            <ul>
+                <li><strong>Resource Type:</strong> <code>Microsoft.Web/staticSites</code></li>
+                <li><strong>App Service App Name:</strong> <code>appServiceAppName</code></li>
+                <li><strong>Location:</strong> 'West Europe' </li>
+                <li><strong>SKU Name:</strong><code>Standard</code> tier SKU</li>
+                <li><strong>Allow Config File Updates:</strong> Set to <code>false</code> to disable updates to config files after deployment</li>
+            </ul>
+
+            <h4>Outputs</h4>
+            <ul>
+                <li><strong>App Host Name:</strong> <code>appServiceAppHostName</code> - default hostname of the static web app.</li>
+                <li><strong>App Endpoint:</strong> <code>appServiceAppEndpoint</code> - endpoint for content distribution</li>
+                <li><strong>App Resource Name:</strong> <code>appServiceAppResourceName</code> - name for reference in other resources.</li>
+            </ul>
+
+
+
+
+
+        <h3>App Service: Linux-Based Docker Container</h3>
+        <p>This App Service hosts a Docker-based API backend. It is deployed using a container image from Azure Container Registry. It also utlizes secure credentials for Docker registry authentication.</p>
+            <h4>Configuration Applied:</h4>
+            <ul>
+                <li><strong>Resource Type:</strong> <code>Microsoft.Web/sites</code></li>
+                <li><strong>App Name:</strong> <code>appServiceAPIAppName</code></li>
+                <li><strong>Location:</strong> Configured to <code>location</code> (Azure region of the resource group)</li>
+                <li><strong>App Service Plan ID:</strong><code>appServicePlanId</code>, pointing to the App Service Plan for scaling</li>
+                <li><strong>Container Registry:</strong> docker container image pulled from <code>https://${containerRegistryName}.azurecr.io/${dockerRegistryImageName}:${dockerRegistryImageTag}</code></li>
+                
+    
+                <li><strong>Environment Type:</strong> app behavior is different depending on environment type (dev, uat, prod)</li>
+                
+                <li><strong>>Docker Registry Credentials:</strong>
+                    <ul>
+                        <li><strong>DOCKER_REGISTRY_SERVER_URL:</strong> URL for the Docker registry (<code>https://${containerRegistryName}.azurecr.io</code>)</li>
+                        <li><strong>DOCKER_REGISTRY_SERVER_USERNAME:</strong>  used to authenticate the Docker registry</li>
+                        <li><strong>DOCKER_REGISTRY_SERVER_PASSWORD:</strong> for Docker registry authentication</li>
+                    </ul>
+                </li>
+                <li><strong>App Configuration:</strong>
+                    <ul>
+                        <li><strong>ftpsState:</strong><code>FtpsOnly</code> for secure FTP connections</li>
+                        <li><strong>linuxFxVersion:</strong><code>DOCKER|${containerRegistryName}.azurecr.io/${dockerRegistryImageName}:${dockerRegistryImageTag}</code></li>
+                        <li><strong>Always On:</strong> Enabled only in prod environment</li>
+                    </ul>
+                </li>
+            </ul>
+
+    </div>
+</body>
+</html>

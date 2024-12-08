@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scrum Methodologies - IE Bank</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 20px;
+            background-color: #f9f9f9;
+            color: #333;
+        }
+        h1, h2, h3 {
+            color: #2E5C6E;
+        }
+        h1 {
+            border-bottom: 2px solid #2E5C6E;
+            padding-bottom: 10px;
+        }
+        ul {
+            margin-left: 20px;
+            list-style-type: disc;
+        }
+        li {
+            margin-bottom: 10px;
+        }
+        p {
+            margin-top: 10px;
+        }
+        .back-link {
+            margin-top: 30px;
+        }
+        a {
+            text-decoration: none;
+            color: #007acc;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <h1>Modularization Strategy</h1>
+
+    <p>As the Infrastructure Developer for the IE Bank app, the modularization strategy adopted allows for a more manageable approach to the deployment process across our multiple environments (dev, uat, prod).</p>
+    <h2>Key Principles of Modularization Strategy</h2>
+    <div>
+        <h3>Seperation of Concerns</h3>
+        <p>Each bicep (module) file focuses on managing a single Azure Resource:
+            <ul>
+                <li>Application Insights</li>
+                <li>Container Registry</li>
+                <li>Key Vault</li>
+                <li>Log Analytics</li>
+                <li>Logic App</li>
+                <li>PostgresSQL Database</li>
+                <li>PostgresSQL Server</li>
+                <li>Workbook</li>
+                <li>App Service Plan</li>
+                    <li>App Service: Static Web App</li>
+                    <li>App Service: Linux Based Docker Container</li>
+            </ul>
+        </p>
+
+        <h3>Parameterization</h3>
+        <p>Modules accept parameters for configurations that differ across environments. Dev & UAT remain similar, but prod allows for changes in:
+            <ul>
+                <li>Resource Group Names: The names of the resources are configured dynamically to reflect their respective environment (dev, uat, prod)</li>
+                <li>Sku: This is configured to be either B1(basic) or F1(free) based on the environment type introduced. </li>
+                <li>'Always On': This feature determines if the website should never be idle/off.</li>
+            </ul>
+            Parameterization allows for flexibility & enables reuse of our code across different environments.
+        </p>
+
+        <h3>Reusability</h3>
+        <p>Our modules were designed to be generic and reusable for the sake of simplicity when deploying three different modules. Each file is reused in each environment type and they are configured dynamically to accept different input parameter files (from dev.parameters.json, uat.parameters.json, prod.parameters.json). </p>
+
+        <h3>Orchestration of Modules</h3>
+        <p>The <code>main.bicep</code> file is the basis of coordinating the deployment process. Within here, modules for <code>Log Analytics</code>,<code>Key Vault</code>,<code>Logic App</code>,and our <code>website.bicep</code> file are established.
+        Within <code>website.bicep</code>, the <code>Container Registry</code>, <code>Application Insights</code>, <code>App Service Plan</code>, <code>Frontend App Service</code>, <code>Backend API App Service</code>, and our <code>database.bicep</code> file are created. 
+        From our <code>database.bicep</code> file, our <code>PostgreSQL Database</code> and <code>PostgreSQL Server</code> are defined. Our <code>Workbook</code> is also defined within <code>Application Insights</code>.
+        <br>
+        This all ensures that our files, are clear and traceable while we are dealing with this many resources. Each coordinating file supplies the correct environment-specific parameters to its modules. This method of delegation allows us to 
+        manage our resouces more efficiently.
+        </p>
+    </div>
+    <div>
+        <h2>Benefits of Modularization</h2>
+        <ul>
+            <li><strong>Maintainability:</strong> If a particular service requires an update or bug fix, only this module would need to be modified. This reduces the risk of introducing errors into other parts of the deployment process.</li>
+            <li><strong>Reusability:</strong> Modules can be used across different environments (dev, uat, prod), saving time and effort in creating IaC from scratch for each.</li>
+            <li><strong>Scalability:</strong> As Azure services are added to our architecture, new modules can be created within their own files and plugged into the <code>main.bicep</code> or other coordianting bicep files (website.bicep, database.bicep) without impacting existing modules.</li>
+            <li><strong>Testability:</strong> Since modules are isolated and self-contained, they can be tested individually to ensure functionality before being integrated into the main deployment pipeline.</li>
+            <li><strong>Flexibility:</strong> Swapping a module for an alternative implementation is straightforward, as long as the new module follows the same input/output parameter structure.</li>
+        </ul>
+    </div>
+    <div>
+        <h2>Implementation Steps</h2>
+        <ul>
+            <li>
+                <h3>Develop Bicep Modules</h3>
+                <p>Each module is written as a <code>.bicep</code> file that encapsulates the deployment logic for a Azure service. Input parameters for each module are picked to cover configuration differences between our three environments.</p>
+            </li>
+            <li>
+                <h3>Create Database & Website File</h3>
+                <p>This setup allows for a more clear and understandable structure of resources. This allows for better scalability and easier testing/debugging through our process. These files combine the majority of our modules into respective groups.</p>
+            </li>
+            <li>
+                <h3>Create Main File</h3>
+                <p>The <code>main.bicep</code> file imports/calls the modules using the <code>module</code> keyword. Input parameters for the main file are structured to contain high-level configurations and pass them to their correct modules.</p>
+            </li>
+            <li>
+                <h3>Define Parameter Files</h3>
+                <p>Separate <code>.json</code> parameter files are created for Development, UAT, and Production environments. These files supply environment-specific values directly to the <code>main.bicep</code> file during deployment.</p>
+            </li>
+        </ul>
+    </div>
+
+
+
+
+
+    
+</body>
+</html>

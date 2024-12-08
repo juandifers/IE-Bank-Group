@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scrum Methodologies - IE Bank</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 20px;
+            background-color: #f9f9f9;
+            color: #333;
+        }
+        h1, h2, h3 {
+            color: #2E5C6E;
+        }
+        h1 {
+            border-bottom: 2px solid #2E5C6E;
+            padding-bottom: 10px;
+        }
+        ul {
+            margin-left: 20px;
+            list-style-type: disc;
+        }
+        li {
+            margin-bottom: 10px;
+        }
+        p {
+            margin-top: 10px;
+        }
+        .back-link {
+            margin-top: 30px;
+        }
+        a {
+            text-decoration: none;
+            color: #007acc;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Infrastructure Release Strategy</h1>
+    <p>This is the outline of the release strategy using GitHub Actions. The release process includes validating, deploying, and linting infrastructure resources across dev, uat, and prod environments, using Azure Bicep templates and environment-specific parameters. Both the CI (lint-build, validate-env) and CD (release (deploy)) pipelines are included in the same ie-bank-infra.yml file. </p>
+
+        <h2>Environment Configuration</h2>
+        <p>The workflow defines environment variables for different stages and services involved in our deployment:</p>
+            <ul>
+                <li><strong>RESOURCE_GROUP_DEV</strong>: BCSAI2024-DEVOPS-STUDENTS-B-DEV</li>
+                <li><strong>RESOURCE_GROUP_UAT</strong>: BCSAI2024-DEVOPS-STUDENTS-B-UAT</li>
+                <li><strong>RESOURCE_GROUP_PROD</strong>: BCSAI2024-DEVOPS-STUDENTS-B-PROD</li>
+                <li><strong>SUBSCRIPTION_ID_DEV</strong>: e0b9cada-61bc-4b5a-bd7a-52c606726b3b</li>
+                <li><strong>DOCKER_REGISTRY_SERVER_URL</strong>: myregistry.azurecr.io</li>
+                <li><strong>slackUrl</strong>: Slack webhook URL for notifications.</li>
+            </ul>
+
+      
+        <h2>Deployment Jobs</h2>
+        <p>There are several jobs defined in the workflow to handle different stages:</p>
+            <h3>Linting and Build Validation</h3>
+            <p>Before deployment, the workflow runs the following checks:</p>
+            <ul>
+                <li><strong>Bicep Linter</strong>: Ensures the Bicep file syntax is correct.</li>
+                <li><strong>Unit Tests</strong>: Runs Bicep unit tests.</li>
+                <li><strong>Checkov Scan</strong>: Performs a security scan on the Bicep file to detect vulnerabilities.</li>
+            </ul>
+            
+            <h3>Validate and Deploy Jobs</h3>
+            <ul>
+                <li><strong>validate-dev</strong>: Validates the deployment for the DEV environment.</li>
+                <li><strong>validate-uat</strong>: Validates the deployment for the UAT environment.</li>
+                <li><strong>validate-prod</strong>: Validates the deployment for the PROD environment.</li>
+            </ul>
+
+            <p>After validation, deployment jobs execute:</p>
+            <ul>
+                <li><strong>deploy-dev</strong>: Deploys the infrastructure to the development environment (triggered by pushes to main or manual 'workflow-dispatch').</li>
+                <li><strong>deploy-uat</strong>: Deploys the infrastructure to the UAT environment (triggered after pull requests to main or manual 'workflow-dispatch or pull requests to main').</li>
+                <li><strong>deploy-prod</strong>: Deploys the infrastructure to the production environment (triggered after pushes to main or manual 'workflow-dispatch').</li>
+            </ul>
+
+            <h3>Other Steps in Workflow Jobs</h3>
+            <ul>
+                <li><strong>Checkout Code</strong>: Fetches the latest code from the repository.</li>
+                <li><strong>Login to Azure</strong>: Logs in to Azure using the credentials stored in GitHub secrets.</li>
+                <li><strong>Deploy to Azure</strong>: Deploys the Bicep file to the Azure resource group for the specified environment.</li>
+            </ul>
+       
+
+    
+</body>
+</html>
