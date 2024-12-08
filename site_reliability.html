@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Site Reliability Engineer Documentation - IE Bank</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 20px;
+            padding: 0;
+            background-color: #f9f9f9;
+            color: #333;
+        }
+        h1 {
+            color: #2E5C6E;
+            border-bottom: 2px solid #2E5C6E;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #2E5C6E;
+            margin-top: 20px;
+        }
+        h3 {
+            color: #2E5C6E;
+            margin-top: 20px;
+        }
+        h4 {
+            color: #2E5C6E;
+            margin-top: 20px;
+        }
+        ul {
+            list-style-type: disc;
+            margin-left: 20px;
+        }
+        ul ul {
+            list-style-type: circle;
+        }
+        li {
+            margin-bottom: 10px;
+        }
+        p {
+            margin-top: 10px;
+        }
+        a {
+            text-decoration: none;
+            color: #007acc;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        strong {
+            color: #2E5C6E;
+        }
+    </style>
+</head>
+<body>
+    <h1>Site Reliability Engineer Documentation</h1>
+    <p>
+        Welcome to the Site Reliability Engineer's section of the IE BANK documentation. Below you will find 
+        key sections that describe the service level agreements, objectives, monitoring strategies, reliability designs,
+        and incident response designs that are essential for ensuring the reliability and availability of IE BANK's systems.
+    </p>
+
+    <h2>Table of Contents</h2>
+    <ul>
+        <li><a href="#sla">Service Level Agreement (SLA)</a></li>
+        <li><a href="#slo">Service Level Objectives (SLO)</a></li>
+        <li><a href="#sli">Service Level Indicators (SLI)</a></li>
+        <li><a href="#monitoring-strategy">Monitoring Strategy</a></li>
+        <li><a href="#incident-response">Incident Response Design</a></li>
+        <li><a href="#reliability-design">Reliability Design</a></li>
+    </ul>
+
+    <h2 id="sla">Service Level Agreement (SLA)</h2>
+    <p><strong>Effective Date:</strong> 10/08/2024<br><strong>Version:</strong> 2.0</p>
+    <h3>Introduction</h3>
+    <p>
+        This Service Level Agreement (SLA) outlines the service commitments provided by Ie Bank regarding the 
+        availability, performance, and security of its banking application hosted on Azure. The purpose of this 
+        document is to ensure that users have clarity on the service levels they can expect, and to foster trust 
+        and transparency in how Ie Bank measures, monitors, and maintains its critical banking services.
+    </p>
+
+    <h3>Scope of Services</h3>
+    <p>This SLA applies to the following components of the Ie Bank application ecosystem:</p>
+    <ul>
+        <li>Frontend: Azure Static Web App or Azure Front Door (if applicable)</li>
+        <li>Backend Services: Azure App Service (running containers or web APIs)</li>
+        <li>Database: Managed PostgreSQL Database on Azure</li>
+        <li>Security & Credentials Management: Azure Active Directory (Azure AD), Azure Key Vault</li>
+        <li>Monitoring & Logging: Azure Application Insights, Azure Monitor, Azure Log Analytics Workspace</li>
+        <li>Alerting & Incident Management: Integrated Slack Notifications, Azure Alerts</li>
+    </ul>
+    <p>
+        <strong>Note:</strong> Overall performance is dependent on these interconnected services. 
+        A degradation in one component may impact the entire system’s service quality.
+    </p>
+
+    <h3>Service Availability</h3>
+    <p>Ie Bank commits to maintaining high availability for core services:</p>
+    <ul>
+        <li>Overall System Availability: 99.7% uptime over a rolling 30-day period</li>
+        <li>Frontend Services (Web App): 99.7% uptime over a rolling 30-day period</li>
+        <li>Backend Services (API/Container Apps): 99.7% uptime over a rolling 30-day period</li>
+        <li>Database (PostgreSQL): 99.7% uptime over a rolling 30-day period</li>
+        <li>Security & Key Vault Services: 99.7% uptime over a rolling 30-day period</li>
+        <li>Monitoring & Logging Services: 99.7% uptime over a rolling 30-day period</li>
+    </ul>
+
+    <h3>Performance Metrics (SLOs)</h3>
+    <p>Ie Bank defines the following Service Level Objectives (SLOs) to guide performance targets:</p>
+    <ul>
+        <li><strong>Availability:</strong>
+            <ul>
+                <li>SLI: Percentage of uptime (SuccessfulRequests/TotalRequests)</li>
+                <li>SLO: 99.7% availability over 30 days</li>
+                <li>Measurement: Track service availability via logs and uptime checks</li>
+                <li>Tools: Azure Monitor, Application Insights</li>
+            </ul>
+        </li>
+        <li><strong>Latency (API Response Time):</strong>
+            <ul>
+                <li>SLI: 95th percentile response time for API requests</li>
+                <li>SLO: 95% of requests &lt; 300ms over a 7-day period</li>
+                <li>Measurement: Collect and analyze API response times from logs and performance tests</li>
+                <li>Tools: Azure Application Insights, Postman tests</li>
+            </ul>
+        </li>
+        <li><strong>Error Rate:</strong>
+            <ul>
+                <li>SLI: Percentage of failed API requests (4xx/5xx)</li>
+                <li>SLO: &lt;0.1% error rate over a 7-day period</li>
+                <li>Measurement: Count failed requests via API error logs</li>
+                <li>Tools: Azure Monitor, Log Analytics</li>
+            </ul>
+        </li>
+        <li><strong>Security (Authentication Success Rate):</strong>
+            <ul>
+                <li>SLI: Rate of successful authentication attempts</li>
+                <li>SLO: 99.99% of authentication attempts succeed without breaches</li>
+                <li>Measurement: Monitor authentication logs for success/failure ratios</li>
+                <li>Tools: Azure AD, Key Vault, Security Center</li>
+            </ul>
+        </li>
+        <li><strong>Data Integrity (Database Transaction Success):</strong>
+            <ul>
+                <li>SLI: Rate of successful database transactions</li>
+                <li>SLO: 99.95% of transactions succeed over a 7-day period</li>
+                <li>Measurement: Monitor database transaction logs for success vs. failure rates</li>
+                <li>Tools: PostgreSQL Monitoring Tools, Azure Monitor</li>
+            </ul>
+        </li>
+        <li><strong>Monitoring & Alerts (Incident Response):</strong>
+            <ul>
+                <li>SLI: Percentage of alerts acknowledged and resolved within target times</li>
+                <li>SLO: 90% of critical alerts acknowledged within 5 minutes and resolved within 30 minutes</li>
+                <li>Measurement: Track alert response and resolution times</li>
+                <li>Tools: Azure Monitor, Slack Notifications</li>
+            </ul>
+        </li>
+    </ul>
+
+    <h3>Penalties for Non-Compliance</h3>
+    <p>
+        If Ie Bank fails to meet the specified availability or performance metrics, customers may be eligible for service credits:
+    </p>
+    <ul>
+        <li>For each hour of downtime beyond the 99.7% availability threshold, a credit of up to 2% of monthly fees (up to a maximum of 30%) may be applied.</li>
+        <li>If a given performance SLO (e.g., latency, error rate) falls below its target for two consecutive measurement periods, Ie Bank will review the issues with the customer and may grant service credits up to 30% of monthly fees.</li>
+    </ul>
+    <p>
+        These credits serve as a means of accountability and incentive for Ie Bank to continuously improve its services.
+    </p>
+
+    <h3>Exclusions</h3>
+    <p>The SLA does not apply to:</p>
+    <ul>
+        <li>Scheduled maintenance windows, communicated in advance.</li>
+        <li>Downtime or performance issues caused by factors outside of Ie Bank’s reasonable control (e.g., upstream Azure outages, force majeure events).</li>
+        <li>Incidents resulting from misuse of services or non-adherence to best practices and security guidelines by the customer.</li>
+    </ul>
+
+    <h3>Monitoring and Reporting</h3>
+    <p>Ie Bank will utilize Azure Monitor, Azure Application Insights, and Azure Log Analytics Workspace for continuous real-time monitoring and alerting. Key aspects:</p>
+    <ul>
+        <li><strong>Real-Time Dashboards:</strong> For immediate visibility into performance and availability.</li>
+        <li><strong>Monthly Reports:</strong> Summarize uptime percentages, latency metrics, error rates, security authentication success rates, data integrity, and alert response times.</li>
+        <li><strong>Incident Reviews:</strong> In case of SLA violations or performance anomalies, reviews and root cause analyses will be conducted and reports shared with stakeholders.</li>
+    </ul>
+
+    <h3>Review and Revision of SLA</h3>
+    <p>
+        This SLA will be reviewed quarterly or whenever significant changes occur in the service infrastructure or business 
+        requirements. Amendments will be communicated to stakeholders at least 30 days in advance of taking effect.
+    </p>
+
+    <h2 id="slo">Service Level Objectives (SLO)</h2>
+    <ul>
+        <li><strong>Availability:</strong> 99.9% uptime over a rolling 30-day period</li>
+        <li><strong>Latency (API Response):</strong> 95% of requests respond in under 300ms over a 7-day period</li>
+        <li><strong>Error Rate:</strong> &lt;0.1% error rate (4xx/5xx) over a 7-day period</li>
+        <li><strong>Security (Authentication):</strong> 99.99% of authentication attempts succeed without breaches</li>
+        <li><strong>Data Integrity:</strong> 99.95% of database transactions succeed over a 7-day period</li>
+        <li><strong>Monitoring & Alerts:</strong> 90% of critical alerts acknowledged within 5 minutes and resolved within 30 minutes</li>
+    </ul>
+
+    <h2 id="sli">Service Level Indicators (SLI)</h2>
+    <ul>
+        <li><strong>Availability (Uptime):</strong> (Successful Requests / Total Requests) ≥ 99.9%</li>
+        <li><strong>Latency (Response Time):</strong> (Requests &lt;300ms / Total Requests) ≥ 95%</li>
+        <li><strong>Error Rate (Failed Requests):</strong> (Successful Requests / Total Requests) ≥ 99.9% or (Failed Requests/Total &lt;0.1%)</li>
+        <li><strong>Security (Auth Success):</strong> (Successful Auth Attempts / Total Auth Attempts) ≥ 99.99%</li>
+        <li><strong>Data Integrity (DB Transactions):</strong> (Successful DB Tx / Total DB Tx) ≥ 99.95%</li>
+        <li><strong>Monitoring & Alerts (Response Time):</strong> (Critical Alerts Acknowledged ≤5min and Resolved ≤30min / Total Critical Alerts) ≥ 90%</li>
+    </ul>
+
+    <h2 id="monitoring-strategy">Monitoring Strategy</h2>
+    <p><strong>Goal:</strong> Ensure that critical banking services meet defined SLOs for availability, performance, security, data integrity, and responsiveness to issues.</p>
+    <p>Our monitoring strategy focuses on proactive detection, rapid incident response, data-driven optimization, and transparent reporting.</p>
+
+    <h3>Azure Services for Monitoring</h3>
+    <ul>
+        <li><strong>Azure Application Insights:</strong> End-to-end visibility into application performance, response times, error rates, and user interactions.</li>
+        <li><strong>Azure Log Analytics Workspace:</strong> Centralized logging and analysis for system/application logs, security events, and infrastructure metrics.</li>
+        <li><strong>Azure Monitor (Metrics & Alerts):</strong> Baseline infrastructure metrics (CPU, memory) and unified alerting for quick detection of issues.</li>
+        <li><strong>Azure Workbooks:</strong> Visualization of metrics, logs, and traces into interactive dashboards for SLO compliance status and root cause analysis.</li>
+    </ul>
+
+    <h3>Monitoring Methods</h3>
+    <h4>Application Performance Monitoring</h4>
+    <p><strong>Objective:</strong> Ensure frontend and backend maintain performance targets (95% requests &lt;300ms, error rate &lt;0.1%).</p>
+    <p><strong>Data Needs:</strong> Page load times, API response times, error counts, authentication success rates.</p>
+    <p><strong>Implementation:</strong></p>
+    <ul>
+        <li>Integrate Application Insights SDK into frontends and APIs.</li>
+        <li>Collect metrics on latency, error frequency, authentication results.</li>
+        <li>Configure Azure Workbooks for daily/weekly SLO trend monitoring.</li>
+    </ul>
+
+    <h4>Capability & Business Transaction Monitoring</h4>
+    <p><strong>Objective:</strong> Ensure key transactions (e.g., DB operations, fund transfers) meet Data Integrity (99.95%) and performance standards.</p>
+    <p><strong>Metrics to Monitor:</strong> Successful vs. failed DB transactions, transaction times, authentication attempts, alert response times.</p>
+    <p><strong>Implementation:</strong></p>
+    <ul>
+        <li>Use custom events in Application Insights to track transaction steps.</li>
+        <li>Query Log Analytics Workspace for DB logs and correlate with front-end/back-end events.</li>
+        <li>Set time-based queries and thresholds; alerts trigger via Azure Monitor for anomalies.</li>
+    </ul>
+
+    <h4>Fault Tolerance & Infrastructure Monitoring</h4>
+    <p><strong>Objective:</strong> Detect/respond to CPU spikes, memory bottlenecks impacting Availability and Latency.</p>
+    <p><strong>Metrics:</strong> CPU usage, memory, network latency, container health.</p>
+    <p><strong>Implementation:</strong></p>
+    <ul>
+        <li>Use Azure Monitor metrics (CPU &lt;80%, etc.) to detect infra issues.</li>
+        <li>Log Analytics captures container restarts, DB performance logs.</li>
+        <li>Alerts to Slack for rapid incident response when thresholds exceeded.</li>
+    </ul>
+
+    <h3>Data Collection & Analysis</h3>
+    <p>
+        All metrics/logs flow into Azure Log Analytics Workspace and Application Insights. 
+        Diagnostic settings ensure comprehensive logging. Data is analyzed near real-time, 
+        alerts fire within minutes of threshold violations.
+    </p>
+
+    <h3>Visualizations & Reporting</h3>
+    <p>Azure Workbooks provide dashboards for:</p>
+    <ul>
+        <li>Availability, latency over time</li>
+        <li>Error rates and recent incidents</li>
+        <li>Authentication success percentages</li>
+        <li>Database transaction success rates</li>
+        <li>Alert acknowledgment and resolution times</li>
+    </ul>
+
+    <h3>Management Controls</h3>
+    <ul>
+        <li>Access restricted to authorized personnel.</li>
+        <li>Quarterly audits on data access and monitoring configurations.</li>
+        <li>SLA and SLO reviews conducted quarterly.</li>
+    </ul>
+
+    <h2 id="incident-response">Incident Response Design</h2>
+    <p><strong>Version:</strong> 1.0<br><strong>Effective Date:</strong> 10/08/2024</p>
+
+    <h3>Purpose</h3>
+    <p>
+        This document outlines the incident response procedures for the Ie Bank application. Its purpose 
+        is to minimize downtime, address performance and security issues rapidly, and maintain compliance 
+        with established SLOs and SLAs.
+    </p>
+
+    <h3>Incident Response Objectives</h3>
+    <ul>
+        <li><strong>Minimize Downtime:</strong> Maintain 99.7% uptime.</li>
+        <li><strong>Ensure SLO Adherence:</strong> Resolve incidents impacting latency, error rates, authentication, data integrity, alerts.</li>
+        <li><strong>Rapid Resolution:</strong> Identify and fix issues promptly.</li>
+        <li><strong>Clear Communication:</strong> Keep internal teams/stakeholders informed.</li>
+    </ul>
+
+    <h3>Detection</h3>
+    <ul>
+        <li><strong>Tools:</strong> Application Insights, Azure Log Analytics Workspace, Azure Monitor & Alerts.</li>
+        <li><strong>Alerts & Thresholds:</strong></li>
+        <ul>
+            <li>Availability Alert: If successful requests drop below 99.7%.</li>
+            <li>Latency Alert: p95 response times &gt; 300ms sustained.</li>
+            <li>Error Rate Alert: Error rate &gt;0.1%.</li>
+            <li>Security Alert: Auth success &lt;99.99%.</li>
+            <li>Data Integrity Alert: DB success &lt;99.95%.</li>
+            <li>Monitoring & Alerts Incident: Unacknowledged critical alerts &gt;5 min or unresolved &gt;30 min.</li>
+            <li>CPU Usage Alert: CPU usage &gt;80% for &gt;5 min.</li>
+        </ul>
+    </ul>
+
+    <h3>Incident Response Steps</h3>
+    <p><strong>Detection:</strong> Alert fires (e.g., “Error rate above 0.1%”).</p>
+    <p><strong>Notification:</strong> Slack notification sent to on-call engineer.</p>
+    <p><strong>Triage:</strong></p>
+    <ul>
+        <li>On-call engineer reviews Azure Workbooks dashboards.</li>
+        <li>Identify impacted component and severity (Critical, High, Medium, Low).</li>
+    </ul>
+    <p><strong>Response Actions by Severity:</strong></p>
+    <ul>
+        <li><strong>Critical Incidents:</strong>
+            <ul>
+                <li>Restart/scale App Services.</li>
+                <li>Check Azure Resource Health.</li>
+                <li>If auth compromised, disable suspicious credentials.</li>
+            </ul>
+        </li>
+        <li><strong>High/Medium Incidents:</strong>
+            <ul>
+                <li>Optimize DB queries or API endpoints.</li>
+                <li>Adjust scaling parameters.</li>
+                <li>Investigate/rollback recent deployments.</li>
+            </ul>
+        </li>
+        <li><strong>Low Incidents:</strong>
+            <ul>
+                <li>Log issue, schedule future optimizations.</li>
+            </ul>
+        </li>
+    </ul>
+
+    <p><strong>Resolution:</strong> Validate metrics return to normal. Confirm no lingering issues.</p>
+    <p><strong>Post-Incident Review:</strong> Conduct retrospective, identify root causes, implement preventive measures.</p>
+
+    <h3>External Communication</h3>
+    <p>
+        For Critical/High incidents impacting users (e.g., transaction slowdown), notify customers via email 
+        or in-app alert:
+    </p>
+    <p>
+        “We are experiencing slower-than-normal transaction processing. Our team is working to resolve this quickly. 
+        Thank you for your patience.”
+    </p>
+
+    <h3>Key Tools and Automation</h3>
+    <ul>
+        <li><strong>Tools:</strong> Application Insights, Log Analytics Workspace, Azure Workbooks, Azure Monitor & Alerts.</li>
+        <li><strong>Automation:</strong> Slack integration for notifications, Azure Resource Health checks, Runbooks for predefined mitigation steps.</li>
+    </ul>
+
+    <h3>Metrics for Measuring Incident Response</h3>
+    <ul>
+        <li><strong>Time to Detect (TTD):</strong> Time from incident occurrence to alert firing.</li>
+        <li><strong>Time to Acknowledge (TTA):</strong> Time from alert to on-call engineer acknowledgment.</li>
+        <li><strong>Time to Resolve (TTR):</strong> Time from alert to full resolution.</li>
+    </ul>
+
+    <h3>Post-Incident Review Process</h3>
+    <p><strong>Root Cause Analysis:</strong> Identify underlying causes (e.g., DB query issues, code regressions).</p>
+    <p><strong>Impact Analysis:</strong> Assess if SLOs/SLAs were breached.</p>
+    <p><strong>Preventive Measures:</strong> Adjust thresholds, improve code, add auto-scaling rules, update documentation/runbooks.</p>
+
+    <h3>Review, Revision, and Acceptance</h3>
+    <p>This incident response plan is reviewed quarterly or after major incidents. Updates communicated to stakeholders and on-call staff.</p>
+
+    <h2 id="reliability-design">Reliability Design</h2>
+    <h3>Business Requirements & Reliability Targets:</h3>
+    <p><strong>Availability Targets:</strong></p>
+    <ul>
+        <li>Overall System: 99.7% over a rolling 30-day period</li>
+        <li>API/Backend Services: 99.7%</li>
+        <li>Database (PostgreSQL): 99.7%</li>
+        <li>Frontend Services: 99.7%</li>
+    </ul>
+    <p><strong>Performance Targets:</strong></p>
+    <ul>
+        <li>Latency (API): 95% of requests &lt;300ms (7-day period)</li>
+        <li>Error Rate: &lt;0.1% of requests failing (7-day period)</li>
+        <li>Authentication Success: 99.99%</li>
+        <li>Data Integrity (DB Transactions): 99.95% success rate (7-day period)</li>
+    </ul>
+    <p><strong>Recovery Objectives:</strong></p>
+    <p><strong>RTO (Recovery Time Objective):</strong></p>
+    <ul>
+        <li>Critical Services (API, DB): ≤4 hours</li>
+        <li>Non-Critical Services (Batch jobs, analytics): ≤8 hours</li>
+    </ul>
+    <p><strong>RPO (Recovery Point Objective):</strong></p>
+    <ul>
+        <li>Transactions: ≤5 minutes</li>
+        <li>User Data (Profiles, Credentials): ≤1 hour</li>
+        <li>Analytics/Reporting Data: ≤24 hours</li>
+    </ul>
+
+    <h3>Resilience Strategy:</h3>
+    <ul>
+        <li><strong>Component Redundancy:</strong> Multiple backend instances, load balancing, cross-region deployments.</li>
+        <li><strong>Database Layer:</strong> Primary-secondary replication, point-in-time backups, geographic redundancy.</li>
+        <li><strong>Fault Isolation:</strong> Circuit breakers, bulkhead patterns for resource isolation.</li>
+    </ul>
+
+    <h3>Recovery Design:</h3>
+    <ul>
+        <li><strong>Backup Strategy:</strong> Transaction logs every 5min, full DB daily, version-controlled config backups.</li>
+        <li><strong>Disaster Recovery (DR):</strong> Secondary region failover, DR runbooks, data consistency checks, DR drills.</li>
+        <li><strong>Failover Process:</strong> Automated triggers, manual override, data integrity validation post-failover.</li>
+    </ul>
+
+    <h3>Operational Reliability:</h3>
+    <ul>
+        <li><strong>Monitoring & Alerting:</strong> Track system vitals, performance metrics, error rates. Alerts with severity, Slack notifications.</li>
+        <li><strong>Incident Response:</strong> Runbooks for rapid issue mitigation, internal/external communication, RCA post-incident.</li>
+    </ul>
+
+    <h3>Testing & Validation:</h3>
+    <ul>
+        <li><strong>Reliability Testing:</strong> Unit, integration, load, stress tests to ensure correctness and performance.</li>
+        <li><strong>Chaos Engineering:</strong> Failure injection, network degradation tests to strengthen resilience.</li>
+        <li><strong>Recovery Testing:</strong> Backup restore drills, RTO/RPO validation, performance checks post-restore.</li>
+    </ul>
+
+    <h3>Continuous Improvement:</h3>
+    <ul>
+        <li><strong>Performance Optimization:</strong> Query tuning, caching, auto-scaling, code optimization.</li>
+        <li><strong>Capacity Planning:</strong> Forecast growth, scale resources, adjust infrastructure.</li>
+        <li><strong>Process Enhancement:</strong> Update runbooks, adopt best practices, training sessions.</li>
+    </ul>
+
+    <h3>Compliance & Security:</h3>
+    <ul>
+        <li><strong>Data Protection:</strong> Encryption at rest/in transit, access controls, audit logs, retention policies.</li>
+        <li><strong>Security Measures:</strong> Authentication, authorization, vulnerability scanning, WAF.</li>
+        <li><strong>Business Continuity:</strong> Impact analyses, risk mitigation strategies, crisis management, stakeholder communication.</li>
+    </ul>
+
+    <p><a href="index.html">← Back to Home</a></p>
+</body>
+</html>
